@@ -1,40 +1,43 @@
-import db from "../Database/index.js";
+import Database from "../Database/index.js"
+
 function AssignmentRoutes(app) {
-  app.get("/api/courses/:cid/assignments", (req, res) => {
-    const { cid } = req.params;
-    const assignments = db.assignments
-      .filter((m) => m.course === cid);
-    res.send(assignments);
-  });
 
-  app.post("/api/courses/:cid/assignments", (req, res) => {
-    const { cid } = req.params;
-    const newAssignment = {
-      ...req.body,
-      course: cid
-    };
-    db.assignments.push(newAssignment);
-    res.send(newAssignment);
-  });
-
-  app.delete("/api/assignments/:aid", (req, res) => {
-    const { aid } = req.params;
-    db.assignments = db.assignments.filter((a) => a._id !== aid);
-    res.sendStatus(200);
-  });
-
-  app.put("/api/assignments/:aid", (req, res) => {
-    const { aid } = req.params;
-    const assignmentIndex = db.assignments.findIndex(
-      (m) => m._id === aid);
-    db.assignments[assignmentIndex] = {
-      ...db.assignments[assignmentIndex],
-      ...req.body
-    };
-    res.sendStatus(204);
-  });
+    app.get("/api/assignments", (req, res) => {
+		const assignments = Database.assignments
+		res.send(assignments)
+	})
 
 
+	app.post("/api/assignments/:courseId", (req, res) => {
+        const {courseId} = req.params;
+		const assignment = { ...req.body, course:courseId, _id: new Date().getTime().toString() }
+        Database.assignments.push(assignment);
+		res.send(assignment);
+	})
 
+
+	app.delete("/api/assignments/:id", (req, res) => {
+		const { id } = req.params
+		Database.assignments = Database.assignments.filter((c) => c._id !== id)
+		res.sendStatus(204)
+	})
+
+
+	app.put("/api/assignments/:id", (req, res) => {
+		const { id } = req.params
+		const assignment = req.body
+		Database.assignments = Database.assignments.map((c) =>
+			c._id === id ? { ...assignment } : c
+		)
+        res.send(assignment)
+	})
+
+    app.get("/api/assignments/:courseId", (req, res) => {
+		const { courseId } = req.params
+		const assignments = Database.assignments.filter((c) => c.course === courseId)
+		res.send(assignments)
+	})
+	
 }
-export default AssignmentRoutes;
+
+export default AssignmentRoutes
